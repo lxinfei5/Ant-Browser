@@ -17,6 +17,7 @@ import (
 type BrowserExtension = browser.Extension
 type BrowserExtensionLookupResult = browser.ExtensionLookupResult
 type BrowserProfileExtensionSettings = browser.ProfileExtensionSettings
+type BrowserForceFontSettings = browser.ForceFontSettings
 
 type BrowserExtensionWebStoreRequest struct {
 	Query       string `json:"query"`
@@ -342,6 +343,20 @@ func (a *App) removeBrowserExtensionInstallDir(installDir string) error {
 		return fmt.Errorf("删除插件目录失败: %w", err)
 	}
 	return nil
+}
+
+func (a *App) BrowserForceFontSettings() (BrowserForceFontSettings, error) {
+	if a.browserMgr == nil {
+		return BrowserForceFontSettings{}, fmt.Errorf("浏览器管理器未初始化")
+	}
+	return a.browserMgr.ForceFontSettings()
+}
+
+func (a *App) BrowserForceFontSaveSettings(settings BrowserForceFontSettings) (BrowserForceFontSettings, error) {
+	if a.browserMgr == nil {
+		return BrowserForceFontSettings{}, fmt.Errorf("浏览器管理器未初始化")
+	}
+	return a.browserMgr.SaveForceFontSettings(settings)
 }
 
 func (a *App) BrowserProfileExtensionGet(profileID string) (BrowserProfileExtensionSettings, error) {

@@ -1365,6 +1365,26 @@ export namespace browser {
 	        this.updatedAt = source["updatedAt"];
 	    }
 	}
+	export class ForceFontSettings {
+	    preset: string;
+	    latinFont: string;
+	    cjkFont: string;
+	    cjkSizeAdjust: string;
+	    updatedAt: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ForceFontSettings(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.preset = source["preset"];
+	        this.latinFont = source["latinFont"];
+	        this.cjkFont = source["cjkFont"];
+	        this.cjkSizeAdjust = source["cjkSizeAdjust"];
+	        this.updatedAt = source["updatedAt"];
+	    }
+	}
 	export class ExtensionLookupResult {
 	    extensionId: string;
 	    name: string;

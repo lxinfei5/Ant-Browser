@@ -19,7 +19,7 @@ import {
 import { fetchBrowserProxies } from '../api/proxies'
 import { ProxyPickerModal } from '../components/ProxyPickerModal'
 import { ExtensionInstallCard, ExtensionManagementHeader, InstalledExtensionsList } from './ExtensionManagementCards'
-import { DownloadDirectoryInstallModal, ExtensionHistoryModal, ExtensionProfileLimitModal, ManualInstallModal } from './ExtensionManagementModals'
+import { DownloadDirectoryInstallModal, ExtensionHistoryModal, ExtensionProfileLimitModal, ForceFontSettingsModal, ManualInstallModal } from './ExtensionManagementModals'
 import { EXTENSION_HISTORY_LIMIT, buildChromeWebStoreQueryURL, createExtensionHistoryRecord, extensionStoreURL, loadExtensionDownloadProxyPreference, loadExtensionHistory, saveExtensionDownloadProxyPreference, saveExtensionHistory, type ExtensionHistoryRecord } from './extensionManagementUtils'
 
 export function ExtensionManagementPage() {
@@ -48,6 +48,7 @@ export function ExtensionManagementPage() {
   const [downloadDirOpen, setDownloadDirOpen] = useState(false)
   const [lastLookupProxyLabel, setLastLookupProxyLabel] = useState('')
   const [limitExtension, setLimitExtension] = useState<BrowserExtension | null>(null)
+  const [forceFontOpen, setForceFontOpen] = useState(false)
 
   const installedIds = useMemo(() => new Set(items.map((item) => item.extensionId)), [items])
   const selectedProxy = useMemo(
@@ -534,10 +535,13 @@ export function ExtensionManagementPage() {
         busyAction={busyAction}
         updatingId={updatingId}
         onRestrictProfiles={setLimitExtension}
+        onConfigureFonts={() => setForceFontOpen(true)}
         onUpdate={(target) => void handleUpdateExtension(target)}
         onToggle={(target) => void handleToggle(target)}
         onDelete={(target) => void handleDelete(target)}
       />
+
+      <ForceFontSettingsModal open={forceFontOpen} onClose={() => setForceFontOpen(false)} />
     </div>
 
   )

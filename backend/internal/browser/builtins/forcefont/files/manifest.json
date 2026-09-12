@@ -1,14 +1,29 @@
 {
   "manifest_version": 3,
   "name": "Force Font",
-  "version": "4.0.0",
-  "description": "Force Font — 强制网页使用 Monaco + 95% 微软雅黑字体链，智能避让图标字体与代码块",
+  "version": "4.1.0",
+  "description": "Force Font — 强制网页字体。默认 Monaco + 95% 微软雅黑，可改为 American Typewriter + 思源宋体或自定义组合；智能避让图标字体与代码块",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0hO4LIBLrkFJeCcs2/qfT8ncMEznPH03DvEYZYTU1+I89fWtM6DbM3mN/4ZTlJgJCogvXCf5mBkeZKPuD0cZbzHS8RdG4JL1iOs4SmaL3gxox/4cBTVthXDREev4EnOIDEkwiIWd/ZS7ohL32MytC9UZTjL39rOF1tM7lx5Xu2XthQy4Qthp240aFQN274BaV/hCtqr2sC+HCqe/alMp5EWgE6zfubatXgb5qwL8RfQRQEi8YXCX2ciuMVc/TXj65gbhM67hOlLg/jtDKd5zuaHgppnr5V/yI6zRTJ/JaCLsJU7q8Nxz7pltCx30noI8hIMNPHpw1h0v6wGLMDNq+wIDAQAB",
   "icons": {
     "16": "icon16.png",
     "32": "icon32.png",
     "48": "icon48.png",
     "128": "icon128.png"
+  },
+  "permissions": ["storage"],
+  "action": {
+    "default_title": "Force Font 字体设置",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon16.png",
+      "32": "icon32.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "options_ui": {
+    "page": "popup.html",
+    "open_in_tab": false
   },
   "content_scripts": [
     {
@@ -17,7 +32,7 @@
         "*://*.seedr.cc/*",
         "*://console.cloud.google.com/cloudshell*"
       ],
-      "js": ["content.js"],
+      "js": ["settings.js", "content.js"],
       "run_at": "document_start",
       "all_frames": true
     }

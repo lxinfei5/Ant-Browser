@@ -1,4 +1,4 @@
-import { Download, ExternalLink, FolderOpen, History, Power, Puzzle, RefreshCw, RotateCw, Search, Settings, Trash2, Users } from 'lucide-react'
+import { Download, ExternalLink, FolderOpen, History, Power, Puzzle, RefreshCw, RotateCw, Search, Settings, Trash2, Type, Users } from 'lucide-react'
 import { Badge, Button, Card, Input } from '../../../shared/components'
 import type { BrowserExtension, BrowserExtensionLookupResult, BrowserProxy } from '../types'
 import { extensionStoreURL, formatExtensionSource, formatExtensionTime, getExtensionManifestMeta, getProxySpeedState } from './extensionManagementUtils'
@@ -189,12 +189,13 @@ export interface InstalledExtensionsListProps {
   busyAction: 'toggle' | 'delete' | ''
   updatingId: string
   onRestrictProfiles: (item: BrowserExtension) => void
+  onConfigureFonts?: (item: BrowserExtension) => void
   onUpdate: (item: BrowserExtension) => void
   onToggle: (item: BrowserExtension) => void
   onDelete: (item: BrowserExtension) => void
 }
 
-export function InstalledExtensionsList({ items, busyId, busyAction, updatingId, onRestrictProfiles, onUpdate, onToggle, onDelete }: InstalledExtensionsListProps) {
+export function InstalledExtensionsList({ items, busyId, busyAction, updatingId, onRestrictProfiles, onConfigureFonts, onUpdate, onToggle, onDelete }: InstalledExtensionsListProps) {
   return (
     <Card>
       <div className="mb-3 flex items-center justify-between">
@@ -209,6 +210,7 @@ export function InstalledExtensionsList({ items, busyId, busyAction, updatingId,
             busyAction={busyId === item.extensionId ? busyAction : ''}
             updating={updatingId === item.extensionId}
             onRestrictProfiles={onRestrictProfiles}
+            onConfigureFonts={onConfigureFonts}
             onUpdate={onUpdate}
             onToggle={onToggle}
             onDelete={onDelete}
@@ -231,12 +233,13 @@ export interface InstalledExtensionCardProps {
   busyAction: 'toggle' | 'delete' | ''
   updating: boolean
   onRestrictProfiles: (item: BrowserExtension) => void
+  onConfigureFonts?: (item: BrowserExtension) => void
   onUpdate: (item: BrowserExtension) => void
   onToggle: (item: BrowserExtension) => void
   onDelete: (item: BrowserExtension) => void
 }
 
-export function InstalledExtensionCard({ item, busy, busyAction, updating, onRestrictProfiles, onUpdate, onToggle, onDelete }: InstalledExtensionCardProps) {
+export function InstalledExtensionCard({ item, busy, busyAction, updating, onRestrictProfiles, onConfigureFonts, onUpdate, onToggle, onDelete }: InstalledExtensionCardProps) {
   const meta = getExtensionManifestMeta(item)
   const storeUrl = extensionStoreURL(item)
   const actionButtonClass = 'min-w-[72px] will-change-transform hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]'
@@ -279,6 +282,12 @@ export function InstalledExtensionCard({ item, busy, busyAction, updating, onRes
           </div>
         </div>
         <div className="flex shrink-0 gap-2">
+          {item.builtin && onConfigureFonts ? (
+            <Button type="button" size="sm" variant="secondary" onClick={() => onConfigureFonts(item)} className={actionButtonClass}>
+              <Type className="h-4 w-4" />
+              字体
+            </Button>
+          ) : null}
           {storeUrl ? (
             <Button type="button" size="sm" variant="secondary" onClick={() => window.open(storeUrl, '_blank')} className={actionButtonClass}>
               <ExternalLink className="h-4 w-4" />

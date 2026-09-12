@@ -31,3 +31,12 @@ type ProfileExtensionSettings struct {
 	ExtensionIDs []string `json:"extensionIds"`
 	UpdatedAt    string   `json:"updatedAt"`
 }
+
+// ForceFontSettings is the user's latin/CJK pair for the builtin Force Font extension.
+type ForceFontSettings struct {
+	Preset        string `json:"preset"`
+	LatinFont     string `json:"latinFont"`
+	CjkFont       string `json:"cjkFont"`
+	CjkSizeAdjust string `json:"cjkSizeAdjust"`
+	UpdatedAt     string `json:"updatedAt"`
+}

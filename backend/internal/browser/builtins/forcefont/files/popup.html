@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>Force Font</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f4ef;
+      --card: #fffdf8;
+      --line: #e4ddd0;
+      --text: #2a241c;
+      --muted: #7a6d5f;
+      --accent: #8a5a32;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      width: 360px;
+      padding: 14px;
+      font: 13px/1.45 "American Typewriter", "Songti SC", "PingFang SC", serif;
+      color: var(--text);
+      background: var(--bg);
+    }
+    h1 {
+      margin: 0 0 4px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .hint {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .stack { display: grid; gap: 8px; }
+    label.choice {
+      display: grid;
+      gap: 2px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--card);
+      cursor: pointer;
+    }
+    label.choice:has(input:checked) {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+    label.choice strong { font-size: 13px; }
+    label.choice span { color: var(--muted); font-size: 12px; }
+    .row { display: grid; gap: 4px; }
+    input[type="text"] {
+      width: 100%;
+      height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0 10px;
+      font: inherit;
+    }
+    #customFields[hidden] { display: none; }
+    .preview {
+      margin-top: 4px;
+      padding: 10px 12px;
+      border: 1px dashed var(--line);
+      border-radius: 10px;
+      background: var(--card);
+    }
+    .preview .latin { display: block; font-size: 14px; }
+    .preview .cjk { display: block; margin-top: 4px; font-size: 14px; }
+    button {
+      margin-top: 12px;
+      width: 100%;
+      height: 36px;
+      border: 0;
+      border-radius: 9px;
+      background: var(--accent);
+      color: #fff;
+      font: inherit;
+      cursor: pointer;
+    }
+    button:disabled { opacity: .6; cursor: default; }
+    .status {
+      min-height: 18px;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <h1>网页强制字体</h1>
+  <p class="hint">默认 Monaco + 微软雅黑。西文与中文分开指定；中文字体不会抢走英文。</p>
+  <form id="form" class="stack">
+    <label class="choice">
+      <input type="radio" name="preset" value="default" checked>
+      <strong>默认</strong>
+      <span>Monaco + 微软雅黑</span>
+    </label>
+    <label class="choice">
+      <input type="radio" name="preset" value="typewriter">
+      <strong>打字机宋体</strong>
+      <span>American Typewriter + 思源宋体</span>
+    </label>
+    <label class="choice">
+      <input type="radio" name="preset" value="custom">
+      <strong>自定义</strong>
+      <span>填写本机已安装的字体名</span>
+    </label>
+    <div id="customFields" class="stack" hidden>
+      <div class="row">
+        <span>西文 / 数字</span>
+        <input id="latinFont" type="text" placeholder="American Typewriter">
+      </div>
+      <div class="row">
+        <span>中文</span>
+        <input id="cjkFont" type="text" placeholder="Source Han Serif SC">
+      </div>
+    </div>
+    <div class="preview">
+      <span id="latinPreview" class="latin">The quick brown fox 123</span>
+      <span id="cjkPreview" class="cjk">中文网页字体预览</span>
+    </div>
+    <button type="submit" id="save">保存</button>
+    <div class="status" id="status">已打开的页面刷新后生效。Ant Browser 里请优先用插件包管理里的「字体」。</div>
+  </form>
+  <script src="settings.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

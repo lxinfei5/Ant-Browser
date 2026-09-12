@@ -151,6 +151,10 @@ export function BrowserExtensionOpenManualDownloadDir():Promise<void>;
 
 export function BrowserExtensionSetEnabled(arg1:string,arg2:boolean):Promise<browser.Extension>;
 
+export function BrowserForceFontSaveSettings(arg1:browser.ForceFontSettings):Promise<browser.ForceFontSettings>;
+
+export function BrowserForceFontSettings():Promise<browser.ForceFontSettings>;
+
 export function BrowserGetAllTags():Promise<Array<string>>;
 
 export function BrowserGetCookies(arg1:string):Promise<Array<backend.CookieInfo>>;

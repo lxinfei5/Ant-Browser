@@ -282,6 +282,14 @@ export function BrowserExtensionSetEnabled(arg1, arg2) {
   return window['go']['main']['App']['BrowserExtensionSetEnabled'](arg1, arg2);
 }
 
+export function BrowserForceFontSaveSettings(arg1) {
+  return window['go']['main']['App']['BrowserForceFontSaveSettings'](arg1);
+}
+
+export function BrowserForceFontSettings() {
+  return window['go']['main']['App']['BrowserForceFontSettings']();
+}
+
 export function BrowserGetAllTags() {
   return window['go']['main']['App']['BrowserGetAllTags']();
 }

@@ -95,8 +95,11 @@ func TestEnsureBuiltinExtensionsInstallsAndRepairs(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read repaired content: %v", err)
 	}
-	if string(data) == "tampered" || !strings.Contains(string(data), "YAHEI_SIZE_ADJUST") {
+	if string(data) == "tampered" || !strings.Contains(string(data), "__force_font_style__") {
 		t.Fatalf("content.js was not restored from embed")
+	}
+	if _, err := os.Stat(filepath.Join(stored.InstallDir, "settings.js")); err != nil {
+		t.Fatalf("settings.js missing after repair: %v", err)
 	}
 	if _, err := os.Stat(filepath.Join(stored.InstallDir, "evil.js")); !os.IsNotExist(err) {
 		t.Fatal("expected extra file to be removed during repair")

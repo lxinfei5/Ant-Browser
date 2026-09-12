@@ -86,13 +86,33 @@ func readBuiltinForceFontFiles() (map[string][]byte, error) {
 	if _, ok := files["content.js"]; !ok {
 		return nil, fmt.Errorf("内置插件缺少 content.js")
 	}
+	if _, ok := files["settings.js"]; !ok {
+		return nil, fmt.Errorf("内置插件缺少 settings.js")
+	}
+	if _, ok := files["popup.html"]; !ok {
+		return nil, fmt.Errorf("内置插件缺少 popup.html")
+	}
 	return files, nil
+}
+
+func isAllowedBuiltinExtraFile(relative string) bool {
+	return filepath.ToSlash(relative) == forcefont.UserSettingsFileName
+}
+
+func readAllowedBuiltinExtras(installDir string) map[string][]byte {
+	extras := map[string][]byte{}
+	data, err := os.ReadFile(filepath.Join(installDir, forcefont.UserSettingsFileName))
+	if err == nil && len(data) > 0 {
+		extras[forcefont.UserSettingsFileName] = data
+	}
+	return extras
 }
 
 func materializeBuiltinFiles(installDir string, files map[string][]byte) error {
 	if diskMatchesBuiltin(installDir, files) {
 		return nil
 	}
+	preserved := readAllowedBuiltinExtras(installDir)
 	tmpDir := installDir + ".tmp"
 	_ = os.RemoveAll(tmpDir)
 	if err := os.MkdirAll(tmpDir, 0o755); err != nil {
@@ -111,6 +131,13 @@ func materializeBuiltinFiles(installDir string, files map[string][]byte) error {
 		}
 		if err := os.WriteFile(target, data, 0o644); err != nil {
 			return fmt.Errorf("写入内置插件失败: %w", err)
+		}
+	}
+	for relative, data := range preserved {
+		if isAllowedBuiltinExtraFile(relative) {
+			if err := os.WriteFile(filepath.Join(tmpDir, filepath.FromSlash(relative)), data, 0o644); err != nil {
+				return fmt.Errorf("保留内置插件用户设置失败: %w", err)
+			}
 		}
 	}
 	if err := os.RemoveAll(installDir); err != nil {
@@ -137,7 +164,17 @@ func diskMatchesBuiltin(installDir string, files map[string][]byte) bool {
 		}
 	}
 	entries, err := listRegularRelativeFiles(installDir)
-	if err != nil || len(entries) != len(files) {
+	if err != nil {
+		return false
+	}
+	tracked := make([]string, 0, len(entries))
+	for _, name := range entries {
+		if isAllowedBuiltinExtraFile(name) {
+			continue
+		}
+		tracked = append(tracked, name)
+	}
+	if len(tracked) != len(files) {
 		return false
 	}
 	return true

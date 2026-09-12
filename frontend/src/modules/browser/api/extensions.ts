@@ -206,3 +206,48 @@ export async function saveBrowserProfileExtensionSettings(profileId: string, ext
   }
   throw new Error('当前环境不支持保存实例插件配置')
 }
+
+export type ForceFontPreset = 'default' | 'typewriter' | 'custom'
+
+export interface ForceFontSettings {
+  preset: ForceFontPreset
+  latinFont: string
+  cjkFont: string
+  cjkSizeAdjust: string
+  updatedAt: string
+}
+
+function normalizeForceFontSettings(payload: any): ForceFontSettings {
+  const preset = payload?.preset === 'typewriter' || payload?.preset === 'custom' ? payload.preset : 'default'
+  return {
+    preset,
+    latinFont: String(payload?.latinFont || ''),
+    cjkFont: String(payload?.cjkFont || ''),
+    cjkSizeAdjust: String(payload?.cjkSizeAdjust || ''),
+    updatedAt: String(payload?.updatedAt || ''),
+  }
+}
+
+export async function fetchForceFontSettings(): Promise<ForceFontSettings> {
+  const bindings: any = await getBindings()
+  if (bindings?.BrowserForceFontSettings) {
+    return normalizeForceFontSettings(await bindings.BrowserForceFontSettings())
+  }
+  const goApp = getGoApp()
+  if (goApp?.BrowserForceFontSettings) {
+    return normalizeForceFontSettings(await goApp.BrowserForceFontSettings())
+  }
+  throw new Error('当前环境不支持读取强制字体设置')
+}
+
+export async function saveForceFontSettings(settings: ForceFontSettings): Promise<ForceFontSettings> {
+  const bindings: any = await getBindings()
+  if (bindings?.BrowserForceFontSaveSettings) {
+    return normalizeForceFontSettings(await bindings.BrowserForceFontSaveSettings(settings))
+  }
+  const goApp = getGoApp()
+  if (goApp?.BrowserForceFontSaveSettings) {
+    return normalizeForceFontSettings(await goApp.BrowserForceFontSaveSettings(settings))
+  }
+  throw new Error('当前环境不支持保存强制字体设置')
+}

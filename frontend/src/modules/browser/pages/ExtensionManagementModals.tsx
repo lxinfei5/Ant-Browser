@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ExternalLink, Search } from 'lucide-react'
-import { Button, Input, Modal, toast } from '../../../shared/components'
+import { Button, FormItem, Input, Modal, toast } from '../../../shared/components'
 import type { BrowserExtension, BrowserGroupWithCount, BrowserProfile, BrowserProfileExtensionSettings } from '../types'
-import { fetchBrowserProfileExtensionSettings, saveBrowserProfileExtensionSettings, type BrowserExtensionManualDownloadFile, type BrowserExtensionManualInstallGuide } from '../api/extensions'
+import { fetchBrowserProfileExtensionSettings, fetchForceFontSettings, saveBrowserProfileExtensionSettings, saveForceFontSettings, type BrowserExtensionManualDownloadFile, type BrowserExtensionManualInstallGuide, type ForceFontPreset, type ForceFontSettings } from '../api/extensions'
 import { fetchGroups } from '../api/groups'
 import { fetchBrowserProfiles } from '../api/profiles'
 import { extensionHistoryActionLabel, formatExtensionTime, sameStringSet, type ExtensionHistoryRecord } from './extensionManagementUtils'
@@ -413,6 +413,148 @@ export function DownloadDirectoryInstallModal({ open, files, fileLoading, import
             <Button type="button" size="sm" onClick={() => onImportFile(file.fileName)} loading={importingFileName === file.fileName}>导入</Button>
           </div>
         ))}
+      </div>
+    </Modal>
+  )
+}
+
+const FORCE_FONT_PRESETS: Array<{
+  id: ForceFontPreset
+  title: string
+  detail: string
+  latin: string
+  cjk: string
+}> = [
+  { id: 'default', title: '默认', detail: 'Monaco + 微软雅黑', latin: 'Monaco', cjk: 'Microsoft YaHei' },
+  { id: 'typewriter', title: '打字机宋体', detail: 'American Typewriter + 思源宋体', latin: 'American Typewriter', cjk: 'Source Han Serif SC' },
+  { id: 'custom', title: '自定义', detail: '填写本机已安装的字体名', latin: '', cjk: '' },
+]
+
+function previewFontName(name: string) {
+  const cleaned = name.replace(/["';{}<>\\\n\r]/g, '').trim()
+  return cleaned.slice(0, 80) || 'sans-serif'
+}
+
+function resolvedForceFontPreview(settings: Pick<ForceFontSettings, 'preset' | 'latinFont' | 'cjkFont'>) {
+  const named = FORCE_FONT_PRESETS.find((item) => item.id === settings.preset)
+  if (settings.preset === 'custom') {
+    return {
+      latin: previewFontName(settings.latinFont || 'Monaco'),
+      cjk: previewFontName(settings.cjkFont || 'Microsoft YaHei'),
+    }
+  }
+  return {
+    latin: named?.latin || 'Monaco',
+    cjk: named?.cjk || 'Microsoft YaHei',
+  }
+}
+
+export function ForceFontSettingsModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const [loading, setLoading] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [preset, setPreset] = useState<ForceFontPreset>('default')
+  const [latinFont, setLatinFont] = useState('')
+  const [cjkFont, setCjkFont] = useState('')
+  const preview = resolvedForceFontPreview({ preset, latinFont, cjkFont })
+
+  useEffect(() => {
+    if (!open) return
+    setLoading(true)
+    fetchForceFontSettings().then((settings) => {
+      setPreset(settings.preset)
+      setLatinFont(settings.preset === 'custom' ? settings.latinFont : '')
+      setCjkFont(settings.preset === 'custom' ? settings.cjkFont : '')
+    }).catch((error: any) => {
+      toast.error(error?.message || '读取字体设置失败')
+    }).finally(() => {
+      setLoading(false)
+    })
+  }, [open])
+
+  const handleSave = async () => {
+    if (preset === 'custom' && (!latinFont.trim() || !cjkFont.trim())) {
+      toast.warning('请填写西文和中文字体名')
+      return
+    }
+    setSaving(true)
+    try {
+      await saveForceFontSettings({
+        preset,
+        latinFont: latinFont.trim(),
+        cjkFont: cjkFont.trim(),
+        cjkSizeAdjust: '',
+        updatedAt: '',
+      })
+      toast.success('字体已保存。已打开的网页请刷新后生效。')
+      onClose()
+    } catch (error: any) {
+      toast.error(error?.message || '保存字体设置失败')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      title="网页强制字体"
+      width="520px"
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose}>取消</Button>
+          <Button onClick={() => void handleSave()} loading={saving} disabled={loading}>保存</Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <p className="text-sm text-[var(--color-text-secondary)]">
+          作用于所有浏览器实例里的网页。默认仍是 Monaco + 微软雅黑；中文字体只覆盖汉字和中文标点，不会抢走英文。
+        </p>
+        <div className="grid gap-2">
+          {FORCE_FONT_PRESETS.map((item) => {
+            const selected = preset === item.id
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setPreset(item.id)}
+                className={`rounded-xl border px-3 py-2.5 text-left transition-colors ${
+                  selected
+                    ? 'border-[var(--color-accent)] bg-[var(--color-bg-muted)]'
+                    : 'border-[var(--color-border-default)] bg-[var(--color-bg-surface)] hover:border-[var(--color-text-muted)]'
+                }`}
+              >
+                <div className="text-sm font-medium text-[var(--color-text-primary)]">{item.title}</div>
+                <div className="mt-0.5 text-xs text-[var(--color-text-muted)]">{item.detail}</div>
+              </button>
+            )
+          })}
+        </div>
+        {preset === 'custom' ? (
+          <div className="grid gap-3 sm:grid-cols-2">
+            <FormItem label="西文 / 数字" required>
+              <Input value={latinFont} onChange={(event) => setLatinFont(event.target.value)} placeholder="American Typewriter" />
+            </FormItem>
+            <FormItem label="中文" required>
+              <Input value={cjkFont} onChange={(event) => setCjkFont(event.target.value)} placeholder="Source Han Serif SC" />
+            </FormItem>
+          </div>
+        ) : null}
+        <div className="rounded-xl border border-dashed border-[var(--color-border-default)] bg-[var(--color-bg-muted)] px-3 py-3">
+          <div className="text-xs text-[var(--color-text-muted)]">预览（需本机已安装该字体）</div>
+          <div className="mt-2 text-[15px] text-[var(--color-text-primary)]" style={{ fontFamily: `"${preview.latin}"` }}>
+            The quick brown fox 123
+          </div>
+          <div className="mt-1 text-[15px] text-[var(--color-text-primary)]" style={{ fontFamily: `"${preview.cjk}"` }}>
+            中文网页字体预览
+          </div>
+        </div>
+        {preset === 'typewriter' ? (
+          <p className="text-xs text-[var(--color-text-muted)]">
+            American Typewriter 为 macOS 系统字体。思源宋体会按 Source Han Serif SC / Noto Serif CJK SC / 思源宋体 / Songti SC 依次回退。
+          </p>
+        ) : null}
       </div>
     </Modal>
   )

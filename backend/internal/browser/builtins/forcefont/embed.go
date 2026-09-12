@@ -10,7 +10,11 @@ const ManifestKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0hO4LIBLrkFJeCc
 
 const SourceURL = "builtin://force-font"
 
-const Version = "4.0.0"
+const Version = "4.1.0"
+
+// UserSettingsFileName is the optional sidecar that stores the user's latin/CJK
+// pair. It is not embedded and must survive builtin integrity rematerialization.
+const UserSettingsFileName = "user-settings.json"
 
 //go:embed all:files
 var Files embed.FS
